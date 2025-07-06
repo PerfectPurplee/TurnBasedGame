@@ -1,43 +1,41 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Unit : MonoBehaviour
-{
-
+public class Unit : MonoBehaviour {
     [SerializeField] private Animator unitAnimator;
 
 
-    private Vector3 targetPosition;
+    private Vector3 _targetPosition;
 
-    private void Update()
-    {
+    public static event Action<Unit> OnUnitSelected;
 
-        float stoppingDistance = .1f;
-        if (Vector3.Distance(transform.position, targetPosition) > stoppingDistance)
-        {
-            Vector3 moveDirection = (targetPosition - transform.position).normalized;
-            float moveSpeed = 4f;
-            transform.position += moveDirection * moveSpeed * Time.deltaTime;
 
-            float rotateSpeed = 10f;
+    private void Update() {
+        const float stoppingDistance = .1f;
+        if (Vector3.Distance(transform.position, _targetPosition) > stoppingDistance) {
+            Vector3 moveDirection = (_targetPosition - transform.position).normalized;
+            const float moveSpeed = 4f;
+            transform.position += moveDirection * (moveSpeed * Time.deltaTime);
+
+            const float rotateSpeed = 10f;
             transform.forward = Vector3.Lerp(transform.forward, moveDirection, Time.deltaTime * rotateSpeed);
 
             unitAnimator.SetBool("IsWalking", true);
-        } else
-        {
+        }
+        else {
             unitAnimator.SetBool("IsWalking", false);
         }
 
-        if (Input.GetMouseButtonDown(0))
-        {
-            Move(MouseWorld.GetPosition());
-        }
     }
 
-    private void Move(Vector3 targetPosition)
-    {
-        this.targetPosition = targetPosition;
+    public void Move(Vector3 targetPosition) {
+        this._targetPosition = targetPosition;
     }
 
+    private void OnMouseDown() {
+        OnUnitSelected?.Invoke(this);
+    }
+    
 }
